@@ -4,9 +4,11 @@ You can edit this file as you like.
 -}
 { name = "my-project"
 , dependencies =
-  [ "affjax"
+  [ "aff"
+  , "affjax"
   , "console"
   , "effect"
+  , "express"
   , "foreign-generic"
   , "psci-support"
   , "var"
