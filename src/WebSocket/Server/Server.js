@@ -15,12 +15,21 @@ exports._newWebSocketServer = function (portNumber) {
     app.use(express.static(path.join(__dirname, '/public')))
 
     const server = createServer(app)
+    server.listen(portNumber, function () {
+      console.log('Listening on http://localhost:' + portNumber)
+    })
     const socket = new ws.Server({ server })
 
-    socket.on('connection', function (socket) {
-      console.log('WebSocket: makeConnection')
+    socket.on('connection', function() {
+      onSuccess(makeConnection)
+    })
+
+    function makeConnection () {
+      console.log('interior of makeConnection')
       const getSocketProp = function (prop) {
-        return function () { return socket[prop] }
+        return function () {
+          return socket[prop]
+        }
       }
       const setSocketProp = function (prop) {
         return function (v) {
@@ -30,7 +39,7 @@ exports._newWebSocketServer = function (portNumber) {
           }
         }
       }
-
+    
       return {
         setBinaryType: setSocketProp('binaryType'),
         getBinaryType: getSocketProp('binaryType'),
@@ -47,8 +56,7 @@ exports._newWebSocketServer = function (portNumber) {
         getProtocol: getSocketProp('protocol'),
         getReadyState: getSocketProp('readyState'),
         getUrl: getSocketProp('url'),
-        closeImpl:
-        function (params) {
+        closeImpl: function (params) {
           return function () {
             if (params == null) {
               socket.close()
@@ -60,21 +68,20 @@ exports._newWebSocketServer = function (portNumber) {
             return {}
           }
         },
-        sendImpl:
-        function (message) {
+        sendImpl: function (message) {
           return function () {
             socket.send(message)
             return {}
           }
         },
-        getSocket: function () { return socket }
+        getSocket: function () {
+          return socket
+        }
       }
-    })
-
-    server.listen(8080, function () {
-      console.log('Listening on http://localhost:8080');
-    })
-
-    return socket
+    }
+    return function (cancelError, onCancelerError, onCancelerSuccess) {
+      cancel();
+      onCancelerSuccess();
+    };
   }
 }

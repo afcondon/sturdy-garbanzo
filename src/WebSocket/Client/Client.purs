@@ -27,8 +27,8 @@ newWebSocket :: URL -> Array Protocol -> Effect Connection
 newWebSocket url protocols = enhanceConnection <$> runFn2 newWebSocketImpl url protocols
 
 foreign import newWebSocketImpl :: Fn2 URL
-                                                   (Array Protocol)
-                                                   (Effect ConnectionImpl)
+                                  (Array Protocol)
+                                  (Effect ConnectionImpl)
 
 enhanceConnection :: ConnectionImpl -> Connection
 enhanceConnection c = Connection $
