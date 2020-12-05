@@ -7,6 +7,7 @@ You can edit this file as you like.
   [ "aff"
   , "affjax"
   , "console"
+  , "debug"
   , "effect"
   , "express"
   , "foreign-generic"

@@ -20,24 +20,18 @@ exports._newWebSocketServer = (function () {
     })
     const socket = new ws.Server({ server })
     socket.on('connection', function() {
-      onSuccess(makeConnection)
+       onSuccess(makeConnection())
     })
-
+  
     function makeConnection () {
       console.log('interior of makeConnection')
-      const getSocketProp = function (prop) {
-        return function () {
-          return socket[prop]
-        }
-      }
-      const setSocketProp = function (prop) {
-        return function (v) {
-          return function () {
-            socket[prop] = v
-            return {}
-          }
-        }
-      }
+      const getSocketProp = (prop) => () => { console.log(`getSocket[${prop}]`); socket[prop]}
+      const setSocketProp = (prop) => (v) => () => { console.log(`setSocket[${prop} = ${v}]`); socket[prop] = v; return {} }
+  
+      socket.on('message', function (message) {
+        console.log(`Received message ${message}`);
+      });
+    
     
       return {
         setBinaryType: setSocketProp('binaryType'),

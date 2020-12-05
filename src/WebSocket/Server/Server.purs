@@ -12,21 +12,16 @@ import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Nullable (toNullable)
 import Effect.Aff (Aff)
 import Effect.Aff.Compat (EffectFnAff, fromEffectFnAff)
-import Effect.Class (liftEffect)
-import Effect.Class.Console (log)
 import Effect.Var (makeGettableVar, makeSettableVar, makeVar)
-import Prelude (bind, pure, unit, ($), (<$>), (>>=), (>>>))
+import Prelude (bind, pure, ($), (<$>), (>>=), (>>>))
 import Web.Event.EventTarget (eventListener)
 
 foreign import _newWebSocketServer :: Fn1 Number (EffectFnAff ConnectionImpl)
--- foreign import _newWebSocketServer :: EffectFnAff ConnectionImpl
 
 -- | Initiate a websocket client connection, only returns once there's actually a connection on it
-newWebSocketServer :: Aff Connection 
-newWebSocketServer = do
-  connectionImpl <- fromEffectFnAff (runFn1 _newWebSocketServer(toNumber 8080))
-  -- connectionImpl <- fromEffectFnAff _newWebSocketServer
-  _ <- liftEffect $ log "connectionImpl acquired"
+newWebSocketServer :: Int -> Aff Connection 
+newWebSocketServer port = do
+  connectionImpl <- fromEffectFnAff (runFn1 _newWebSocketServer(toNumber port))
   pure $ enhanceConnection connectionImpl
 
 
@@ -43,7 +38,7 @@ enhanceConnection c = Connection $
   , url           : makeGettableVar c.getUrl
   , close         : c.closeImpl (toNullable Nothing)
   , close'        : \code reason -> c.closeImpl (toNullable (Just { code, reason: toNullable reason }))
-  , send          : \_ -> pure unit -- c.sendImpl
+  , send          : c.sendImpl
   , socket        : makeGettableVar c.getSocket
   }
   where
