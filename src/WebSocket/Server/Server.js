@@ -9,14 +9,14 @@ const path = require('path')
 const { createServer } = require('http')
 const ws = module.require('ws')
 
-exports._newWebSocketServer = function (portNumber) {
+exports._newWebSocketServer = (function (portOuter) {
   return function () {
     const app = express()
     app.use(express.static(path.join(__dirname, '/public')))
 
     const server = createServer(app)
-    server.listen(portNumber, function () {
-      console.log('Listening on http://localhost:' + portNumber)
+    server.listen(8080, function () {
+      console.log(`Listening on http://localhost:${portOuter}`)
     })
     const socket = new ws.Server({ server })
 
@@ -84,4 +84,4 @@ exports._newWebSocketServer = function (portNumber) {
       onCancelerSuccess();
     };
   }
-}
+})()

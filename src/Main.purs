@@ -5,7 +5,6 @@ import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
 import Effect.Console (log)
 import Prelude (Unit, bind, ($))
-import WebSocket (Connection(..))
 import WebSocket.Server (newWebSocketServer) as ServerWS
 
 
