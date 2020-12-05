@@ -8,18 +8,17 @@ const express = require('express')
 const path = require('path')
 const { createServer } = require('http')
 const ws = module.require('ws')
+const app = express()
+app.use(express.static(path.join(__dirname, '/public')))
+const server = createServer(app)
 
-exports._newWebSocketServer = (function (portOuter) {
-  return function () {
-    const app = express()
-    app.use(express.static(path.join(__dirname, '/public')))
+exports._newWebSocketServer = (function () {
 
-    const server = createServer(app)
-    server.listen(8080, function () {
-      console.log(`Listening on http://localhost:${portOuter}`)
+  return (port)  => function(onError, onSuccess) {
+    server.listen(port, function () {
+      console.log(`Listening on http://localhost:${port}`)
     })
     const socket = new ws.Server({ server })
-
     socket.on('connection', function() {
       onSuccess(makeConnection)
     })

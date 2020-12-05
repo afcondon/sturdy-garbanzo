@@ -18,14 +18,14 @@ import Effect.Var (makeGettableVar, makeSettableVar, makeVar)
 import Prelude (bind, pure, unit, ($), (<$>), (>>=), (>>>))
 import Web.Event.EventTarget (eventListener)
 
--- foreign import _newWebSocketServer :: Fn1 Number (EffectFnAff ConnectionImpl)
-foreign import _newWebSocketServer :: EffectFnAff ConnectionImpl
+foreign import _newWebSocketServer :: Fn1 Number (EffectFnAff ConnectionImpl)
+-- foreign import _newWebSocketServer :: EffectFnAff ConnectionImpl
 
 -- | Initiate a websocket client connection, only returns once there's actually a connection on it
 newWebSocketServer :: Aff Connection 
 newWebSocketServer = do
-  -- connectionImpl <- fromEffectFnAff (runFn1 _newWebSocketServer(toNumber 8080))
-  connectionImpl <- fromEffectFnAff _newWebSocketServer
+  connectionImpl <- fromEffectFnAff (runFn1 _newWebSocketServer(toNumber 8080))
+  -- connectionImpl <- fromEffectFnAff _newWebSocketServer
   _ <- liftEffect $ log "connectionImpl acquired"
   pure $ enhanceConnection connectionImpl
 
