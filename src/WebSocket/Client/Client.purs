@@ -3,23 +3,14 @@
 module WebSocket.Client ( newWebSocket) where
 
 import Effect (Effect)
-import Effect.Var (Var, GettableVar, SettableVar, makeVar, makeGettableVar, makeSettableVar)
-import Web.Event.EventTarget (eventListener, EventListener)
-import Web.Event.Internal.Types (Event)
-import Web.Socket.Event.CloseEvent (CloseEvent)
-import Web.Socket.Event.MessageEvent (data_, MessageEvent)
-import Data.Enum (class BoundedEnum, class Enum, defaultSucc, defaultPred, toEnum, Cardinality(..))
-import Foreign (unsafeFromForeign)
+import Effect.Var (makeGettableVar, makeSettableVar, makeVar)
+import Web.Event.EventTarget (eventListener)
+import Data.Enum (toEnum)
 import Data.Function.Uncurried (runFn2, Fn2)
 import Data.Functor.Invariant (imap)
-import Data.Generic.Rep (class Generic)
-import Data.Generic.Rep.Show (genericShow)
-import Data.Generic.Rep.Eq (genericEq)
-import Data.Generic.Rep.Ord (genericCompare)
 import Data.Maybe (Maybe(..), fromMaybe)
-import Data.Nullable (toNullable, Nullable)
-import Prelude (class Ord, compare, class Eq, eq, class Bounded, class Show, Unit, (<$>), (>>>), (>>=), ($))
-import Unsafe.Coerce (unsafeCoerce)
+import Data.Nullable (toNullable)
+import Prelude (($), (<$>), (>>=), (>>>))
 import WebSocket.Types
 
 -- | Initiate a websocket connection.
