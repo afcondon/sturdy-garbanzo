@@ -20,30 +20,23 @@ exports._ajax = (function () {
     getResponse: (xhr) => xhr.response
   }
 
-  return (mkHeader, options) => function (errback, callback) {
+  return (mkHeader, options) => function (onError, onSuccess) {
     const xhr = ajax.newXHR()
     const fixedUrl = ajax.fixupUrl(options.url)
 
-    xhr.open(
-      options.method || 'GET',
-      fixedUrl,
-      true,
-      options.username,
-      options.password
-    )
-
+    xhr.open( options.method || 'GET', fixedUrl, true, options.username, options.password 
     if (options.headers) {
       try {
         for (let i = 0, header; (header = options.headers[i]) != null; i++) {
           xhr.setRequestHeader(header.field, header.value)
         }
       } catch (e) {
-        errback(e)
+        onError(e)
       }
     }
     const onerror = function (msg) {
       return function () {
-        errback(new Error(msg + ': ' + options.method + ' ' + options.url))
+        onError(new Error(msg + ': ' + options.method + ' ' + options.url))
       }
     }
 
@@ -52,7 +45,7 @@ exports._ajax = (function () {
     xhr.ontimeout = onerror('AJAX request timed out')
 
     xhr.onload = function () {
-      callback({
+      onSuccess({
         status: xhr.status,
         statusText: xhr.statusText,
         headers: xhr
