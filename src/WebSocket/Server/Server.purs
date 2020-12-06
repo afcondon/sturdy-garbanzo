@@ -4,11 +4,10 @@ module WebSocket.Server ( newWebSocketServer ) where
 
 import WebSocket.Types
 
-import Data.Enum (toEnum)
 import Data.Function.Uncurried (Fn1, runFn1)
 import Data.Functor.Invariant (imap)
 import Data.Int (toNumber)
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Maybe (Maybe(..))
 import Data.Nullable (toNullable)
 import Effect.Aff (Aff)
 import Effect.Aff.Compat (EffectFnAff, fromEffectFnAff)
@@ -23,7 +22,6 @@ newWebSocketServer :: Int -> Aff Connection
 newWebSocketServer port = do
   connectionImpl <- fromEffectFnAff (runFn1 _newWebSocketServer(toNumber port))
   pure $ enhanceConnection connectionImpl
-
 
 enhanceConnection :: ConnectionImpl -> Connection
 enhanceConnection c = Connection $
@@ -41,8 +39,3 @@ enhanceConnection c = Connection $
   , send          : c.sendImpl
   , socket        : makeGettableVar c.getSocket
   }
-  where
-    unsafeReadyState :: Int -> ReadyState
-    unsafeReadyState x =
-      fromMaybe (specViolation "readyState isn't in the range of valid constants")
-                (toEnum x)

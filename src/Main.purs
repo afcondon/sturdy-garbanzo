@@ -1,63 +1,51 @@
 module Main where
 
-import Affjax (get)
-import Debug.Trace (trace)
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Effect.Var (($=))
-import Node.Express.Types (Event)
-import Prelude (Unit, bind, discard, pure, unit, void, when, ($), (<<<), (<>), (=<<), (==))
+import Prelude (Unit, bind, discard, when, ($), (<>), (==))
 import Web.Socket.Event.MessageEvent (MessageEvent)
-import WebSocket (Connection(..), Message(..), runMessage, runMessageEvent, runURL)
+import WebSocket (Connection(..), Message(..), URL(..), runMessage, runMessageEvent)
+import WebSocket (newWebSocket) as ClientWS
 import WebSocket.Server (newWebSocketServer) as ServerWS
 
-
--- openHandler :: forall e. Connection -> e -> Effect Unit
--- openHandler (Connection socket) event = do
---   trace { fn: "openHandler", event: event } \_ -> pure unit
---   pure unit
---   -- void $ trace event
---   -- log "onopen: Connection opened"
-
---   -- -- log <<< runURL =<< get socket.url
-
---   -- log "onopen: Sending 'hello'"
---   -- socket.send (Message "hello")
-
---   -- log "onopen: Sending 'goodbye'"
---   -- socket.send (Message "goodbye")
-
--- messageHandler :: MessageEvent -> Effect Unit
--- messageHandler event = do
---   let received = runMessage (runMessageEvent event)
-
---   log $ "onmessage: Received '" <> received <> "'"
-
---   when (received == "goodbye") do
---     log "onmessage: closing connection"
---     socket.close
-
--- closeHandler :: forall e. Connection -> e -> Effect Unit
--- closeHandler (Connection socket) event = do
---   trace { fn: "messageHandler", event: event } \_ -> pure unit
---   pure unit
---     -- void $ trace event
---     -- log "onclose: Connection closed"
-
--- setHandlers :: Connection -> Effect Unit
--- setHandlers c@(Connection socket) = do
---   socket.onopen    $= openHandler c
---   socket.onmessage $= messageHandler
---   socket.onclose   $= closeHandler c
-
+sendMessage :: Connection -> String -> Effect Unit
 sendMessage = \(Connection ws) msg -> ws.send (Message msg)
+
+openHandler :: forall e. Connection -> e -> Effect Unit
+openHandler socket event = do
+  log "onopen: Sending 'hello'"
+  socket `sendMessage` "hello"
+
+  log "onopen: Sending 'goodbye'"
+  socket `sendMessage` "goodbye"
+
+messageHandler :: Connection -> MessageEvent -> Effect Unit
+messageHandler (Connection socket) event = do
+  let received = runMessage (runMessageEvent event)
+
+  log $ "onmessage: Received '" <> received <> "'"
+
+  when (received == "goodbye") do
+    log "onmessage: closing connection"
+    socket.close
+
+closeHandler :: forall e. Connection -> e -> Effect Unit
+closeHandler _ event = do
+    log "onclose: Connection closed"
+
+setHandlers :: Connection -> Effect Unit
+setHandlers c@(Connection socket) = do
+  socket.onopen    $= openHandler c
+  socket.onmessage $= messageHandler c
+  socket.onclose   $= closeHandler c
 
 main :: Effect Unit
 main = launchAff_ do
-  socket <- ServerWS.newWebSocketServer 8080
-  -- liftEffect $ setHandlers socket
-  liftEffect $ socket `sendMessage` "foo"
-  liftEffect $ sendMessage socket "bar" 
-  liftEffect $ log "🍝"
+  clientSocket <- liftEffect $ ClientWS.newWebSocket (URL "ws://localhost:8888") []
+  serverSocket <- ServerWS.newWebSocketServer 8080
+  liftEffect $ setHandlers serverSocket
+  liftEffect $ sendMessage serverSocket "reach out, i'll be there"
+  liftEffect $ log "...and now we listen"

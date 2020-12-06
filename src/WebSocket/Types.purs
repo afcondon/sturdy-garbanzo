@@ -1,44 +1,48 @@
 module WebSocket.Types where
 
+import Data.Enum (class BoundedEnum, class Enum, Cardinality(..), defaultPred, defaultSucc, toEnum)
+import Data.Generic.Rep (class Generic)
+import Data.Generic.Rep.Eq (genericEq)
+import Data.Generic.Rep.Ord (genericCompare)
+import Data.Generic.Rep.Show (genericShow)
+import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Nullable (Nullable)
+import Debug.Trace (spy)
 import Effect (Effect)
-import Effect.Var (Var, GettableVar, SettableVar, makeVar, makeGettableVar, makeSettableVar)
-import Web.Event.EventTarget (eventListener, EventListener)
+import Effect.Var (GettableVar, SettableVar, Var)
+import Foreign (unsafeFromForeign)
+import Prelude (class Bounded, class Eq, class Ord, class Show, show, Unit, compare, eq, (<>), ($))
+import Unsafe.Coerce (unsafeCoerce)
+import Web.Event.EventTarget (EventListener)
 import Web.Event.Internal.Types (Event)
 import Web.Socket.Event.CloseEvent (CloseEvent)
 import Web.Socket.Event.MessageEvent (data_, MessageEvent)
-import Data.Enum (class BoundedEnum, class Enum, defaultSucc, defaultPred, toEnum, Cardinality(..))
-import Foreign (unsafeFromForeign)
-import Data.Function.Uncurried (runFn2, Fn2)
-import Data.Functor.Invariant (imap)
-import Data.Generic.Rep (class Generic)
-import Data.Generic.Rep.Show (genericShow)
-import Data.Generic.Rep.Eq (genericEq)
-import Data.Generic.Rep.Ord (genericCompare)
-import Data.Maybe (Maybe(..), fromMaybe)
-import Data.Nullable (toNullable, Nullable)
-import Prelude (class Ord, compare, class Eq, eq, class Bounded, class Show, Unit, (<$>), (>>>), (>>=), ($))
-import Unsafe.Coerce (unsafeCoerce)
 
 foreign import specViolation :: forall a. String -> a
+
+unsafeReadyState :: Int -> ReadyState
+unsafeReadyState x = fromMaybe (specViolation "readyState isn't in the range of valid constants") (toEnum x)
+  where
+    _ = spy $ "checking ready state" <> show x
 
 runMessageEvent :: MessageEvent -> Message
 runMessageEvent event = unsafeFromForeign $ data_ event
 
 type ConnectionImpl =
-  { setBinaryType :: String -> Effect Unit
-  , getBinaryType :: Effect String
+  { setBinaryType     :: String -> Effect Unit
+  , getBinaryType     :: Effect String
   , getBufferedAmount :: Effect BufferedAmount
-  , setOnclose :: EventListener -> Effect Unit
-  , setOnerror :: EventListener -> Effect Unit
-  , setOnmessage :: EventListener -> Effect Unit
-  , setOnopen :: EventListener -> Effect Unit
-  , setProtocol :: Protocol -> Effect Unit
-  , getProtocol :: Effect Protocol
-  , getReadyState :: Effect Int
-  , getUrl :: Effect URL
-  , closeImpl :: Nullable { code :: Code, reason :: Nullable Reason } -> Effect Unit
-  , sendImpl :: Message -> Effect Unit
-  , getSocket :: Effect WebSocket
+  , setOnclose        :: EventListener -> Effect Unit
+  , setOnerror        :: EventListener -> Effect Unit
+  , setOnmessage      :: EventListener -> Effect Unit
+  , setOnopen         :: EventListener -> Effect Unit
+  , setProtocol       :: Protocol -> Effect Unit
+  , getProtocol       :: Effect Protocol
+  , getReadyState     :: Effect Int
+  , getUrl            :: Effect URL
+  , closeImpl         :: Nullable { code :: Code, reason :: Nullable Reason } -> Effect Unit
+  , sendImpl          :: Message -> Effect Unit
+  , getSocket         :: Effect WebSocket
   }
 
 coerceEvent :: forall a. Event -> a

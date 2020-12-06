@@ -1,12 +1,7 @@
 /* global exports */
 'use strict';
 
-// module WebSocket
-
-exports.specViolation = function (s) {
-  throw new Error(s)
-}
-
+// module WebSocket.Client
 exports.newWebSocketImpl = function (url, protocols) {
   return function () {
     const platformSpecific = {}
@@ -29,7 +24,7 @@ exports.newWebSocketImpl = function (url, protocols) {
         }
       }
     }
-    return {
+    return { // factor this code - common to server and client back into Types.js
       setBinaryType: setSocketProp('binaryType'),
       getBinaryType: getSocketProp('binaryType'),
       getBufferedAmount: getSocketProp('bufferedAmount'),
