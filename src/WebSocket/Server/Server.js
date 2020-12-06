@@ -37,6 +37,13 @@ exports._newWebSocketServer = (function () {
       function makeConnection (ws) {
         console.log('makeConnection')
 
+
+        ws.on('message', function incoming(message) {
+          console.log('received: %s', message);
+        });
+      
+        ws.send('something');
+      
         const getSocketProp = prop => () => socket[prop]
         const setSocketProp = (prop) => (v) => () => {
           ws.on(prop, v)
