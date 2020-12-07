@@ -12,6 +12,18 @@ several ways.
 Most important difference is that in order to use a server websocket you are probably going to prefer to do so in `Aff` rather than synchronously. 
 This is because the `Connection` can be done immediately but it only makes sense to return the `Socket` when at least one client has connected to it.
 
+So, we use `Aff` for the connection as you can see in the `main`:
+```haskell
+main :: Effect Unit
+main = launchAff_ do
+  clientSocket <- liftEffect $ ClientWS.newWebSocket (URL "ws://localhost:8888") []
+  serverSocket <- ServerWS.newWebSocketServer 8080
+  liftEffect $ setHandlers serverSocket
+  liftEffect $ sendMessage serverSocket "reach out, i'll be there"
+  liftEffect $ log "...and now we listen"
+```
+(probably in a more realistic example you'd have less `liftEffect`)
+
 # what's here
 
 i've broken the original library apart a bit, abstracting the common stuff and making separate modules for client and server sockets. 
