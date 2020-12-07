@@ -34,4 +34,10 @@ the server socket code simply won't work in the browser and i haven't made any n
 if you `spago run` the main here AND you connect to the resulting socket (ie at `ws://localhost:8080`), for example using `websocat` utility, then you should
 see activity in the console when you type into the client and if you type `goodbye` it will close the socket.
 
+# useful references
+
+* [ws] (https://github.com/websockets/ws): Underlying Node websocket library used
+* [websocat](https://github.com/vi/websocat): tremendously useful utility
+* Writing [Web socket servers](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_servers)
+
 It's very unpolished, more of a gist than a repo but still, i think, useful.
