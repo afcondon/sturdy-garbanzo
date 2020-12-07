@@ -1,6 +1,6 @@
 -- | This module defines a simple low-level interface to the websockets API.
 
-module WebSocket.Server ( newWebSocketServer ) where
+module WebSocket.Server ( newWebSocketServer, tryDecodeMessage ) where
 
 import WebSocket.Types
 
@@ -13,9 +13,17 @@ import Effect.Aff (Aff)
 import Effect.Aff.Compat (EffectFnAff, fromEffectFnAff)
 import Effect.Var (makeGettableVar, makeSettableVar, makeVar)
 import Prelude (bind, pure, ($), (<$>), (>>=), (>>>))
+import Unsafe.Coerce (unsafeCoerce)
 import Web.Event.EventTarget (eventListener)
+import Web.Socket.Event.MessageEvent (MessageEvent)
 
 foreign import _newWebSocketServer :: Fn1 Number (EffectFnAff ConnectionImpl)
+
+-- NB seems like MessageEvent in nodes `ws` library isn't actually the same as that in 
+-- browser which is what is modelled in Web.Socket.Event.MessageEvent??? 
+-- TODO confirm this and explicitly distinguish the types and provide different runMessage
+tryDecodeMessage :: MessageEvent -> Maybe String
+tryDecodeMessage event = Just $ unsafeCoerce event -- TODO look into the contents
 
 -- | Initiate a websocket client connection, only returns once there's actually a connection on it
 newWebSocketServer :: Int -> Aff Connection 

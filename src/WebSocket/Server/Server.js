@@ -34,28 +34,30 @@ exports._newWebSocketServer = (function () {
 function makeConnection (ws) {
   console.log('makeConnection')
 
-  const getSocketProp = prop => () => socket[prop]
+  const getSocketProp = prop => () => ws[prop]
   const setSocketProp = (prop) => (v) => () => {
     ws.on(prop, v)
-    return {}
   }
 
-  return {
+  const connectionImpl = {
+    // props
     setBinaryType: setSocketProp('binaryType'),
     getBinaryType: getSocketProp('binaryType'),
     getBufferedAmount: getSocketProp('bufferedAmount'),
-    setOnclose: setSocketProp('onclose'),
-    getOnclose: getSocketProp('onclose'),
-    setOnerror: setSocketProp('onerror'),
-    getOnerror: getSocketProp('onerror'),
-    setOnmessage: setSocketProp('onmessage'),
-    getOnmessage: getSocketProp('onmessage'),
-    setOnopen: setSocketProp('onopen'),
-    getOnopen: getSocketProp('onopen'),
-    setProtocol: setSocketProp('protocol'),
-    getProtocol: getSocketProp('protocol'),
     getReadyState: getSocketProp('readyState'),
     getUrl: getSocketProp('url'),
+    // event handlers
+    setOnclose: setSocketProp('close'),
+    getOnclose: getSocketProp('close'),
+    setOnerror: setSocketProp('error'),
+    getOnerror: getSocketProp('error'),
+    setOnmessage: setSocketProp('message'),
+    getOnmessage: getSocketProp('message'),
+    setOnopen: setSocketProp('open'),
+    getOnopen: getSocketProp('open'),
+    setProtocol: setSocketProp('protocol'),
+    getProtocol: getSocketProp('protocol'),
+    // methods
     closeImpl: function (params) {
       return function () {
         if (params == null) {
@@ -78,4 +80,6 @@ function makeConnection (ws) {
       return ws
     }
   }
+  console.log(connectionImpl)
+  return connectionImpl
 }

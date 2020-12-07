@@ -1,21 +1,22 @@
 module Main where
 
+import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Effect.Var (($=))
-import Prelude (Unit, bind, discard, when, ($), (<>), (==))
+import Prelude (Unit, bind, discard, pure, unit, when, ($), (<>), (==))
 import Web.Socket.Event.MessageEvent (MessageEvent)
-import WebSocket (Connection(..), Message(..), URL(..), runMessage, runMessageEvent)
+import WebSocket (Connection(..), Message(..), URL(..))
 import WebSocket (newWebSocket) as ClientWS
-import WebSocket.Server (newWebSocketServer) as ServerWS
+import WebSocket.Server (newWebSocketServer, tryDecodeMessage) as ServerWS
 
 sendMessage :: Connection -> String -> Effect Unit
 sendMessage = \(Connection ws) msg -> ws.send (Message msg)
 
 openHandler :: forall e. Connection -> e -> Effect Unit
-openHandler socket event = do
+openHandler socket = \event -> do
   log "onopen: Sending 'hello'"
   socket `sendMessage` "hello"
 
@@ -23,17 +24,17 @@ openHandler socket event = do
   socket `sendMessage` "goodbye"
 
 messageHandler :: Connection -> MessageEvent -> Effect Unit
-messageHandler (Connection socket) event = do
-  let received = runMessage (runMessageEvent event)
-
-  log $ "onmessage: Received '" <> received <> "'"
-
-  when (received == "goodbye") do
-    log "onmessage: closing connection"
-    socket.close
+messageHandler (Connection socket) = \event -> do
+  case ServerWS.tryDecodeMessage event of
+    Just received -> do
+        log $ "onmessage: Received '" <> received <> "'"
+        when (received == "goodbye\n") do
+          log "onmessage: closing connection"
+          socket.close -- not working yet, apparently?
+    Nothing -> pure unit
 
 closeHandler :: forall e. Connection -> e -> Effect Unit
-closeHandler _ event = do
+closeHandler _ = \event -> do
     log "onclose: Connection closed"
 
 setHandlers :: Connection -> Effect Unit
