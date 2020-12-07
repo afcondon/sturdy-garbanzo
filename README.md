@@ -1,5 +1,5 @@
 # web socket server on NodeJS/ws
-## Example program for extension of purescript-websocket-simple to support server sockets too
+## Example of extension of purescript-websocket-simple to support server sockets too
 
 This is a derivation of [`purescript-websocket-simple`](https://github.com/zudov/purescript-websocket-simple) (which is a very useful library that
 protected me from now from ever having to learn or even understand websockets at all. but as soon as i wanted originate a websocket - 
